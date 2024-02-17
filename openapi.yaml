@@ -1,0 +1,719 @@
+openapi: 3.0.0
+info:
+  title: Game Site API
+  description: >-
+    An application designed for organizing controllable closed beta-testing
+    programs for software and games with the help of volunteers.
+  version: 0.1.9
+servers:
+  - url: https://test.weirdcat.su/v1
+    description: Temporary test server
+tags:
+  - name: account
+    description: User account interactions
+  - name: beta
+    description: Features related to beta test
+paths:
+  /api/account/register:
+    post:
+      tags:
+        - account
+      summary: Register a new user account
+      description: >-
+        Upon registration user has to provide data such as their first and last
+        name, their email and a new password to be used for their account. The
+        resume is used to describe the person and their interests in order to
+        prove them suitable for application in the betatest program. If the data
+        is valid, a new account is created and the activation link is sent to
+        the provided email address. **Warning:** these links are TEMPORARY and
+        will expire in 2 days if account is not activated, leading to complete
+        deletion of the account.
+      parameters:
+        - name: username
+          required: true
+          in: query
+          schema:
+            type: string
+          example: user@example.com
+          description: Must be a valid user email
+        - name: password
+          required: true
+          in: query
+          schema:
+            type: string
+          example: sTr00nkP4$$wOrD
+        - name: first_name
+          required: true
+          in: query
+          schema:
+            type: string
+          example: Kevin
+        - name: last_name
+          required: true
+          in: query
+          schema:
+            type: string
+          example: Costner
+        - name: resume
+          required: true
+          in: query
+          schema:
+            type: string
+          example: >-
+            Creative and innovative UX designer with 4+ years of experience in
+            designing user interfaces.
+      responses:
+        '200':
+          description: Registration successful
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AccountToken'
+        '403':
+          description: Bad request
+        '409':
+          description: Account already exists
+        '429':
+          description: Too many requests
+  /api/account/activate/{code}:
+    put:
+      tags:
+        - account
+      summary: Activate a new account via email code
+      description: >-
+        Used to activate the account after it was registered or to unlock it in case it was suspended. *Code* resembles a unique one-time code for account activation that is available in account restoration emails. New password may be needed to provide when the server requires it.
+      parameters:
+        - name: code
+          required: true
+          in: path
+          schema:
+            type: string
+            example: 5D2CECBD26506AE2468C61F1C3866D2E999B5DFC4721731627D436ABD1BA9256
+        - name: new_password
+          required: false
+          in: query
+          schema:
+            type: string
+            example: sTr00nkP4$$wOrD
+      responses:
+        '200':
+          description: Activation successful
+        '403':
+          description: Wrong activation code
+        '409':
+          description: New password is required this time
+        '400':
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: 'docs/#/components/schemas/ValidationError'
+  /api/account/login:
+    post:
+      tags:
+        - account
+      summary: Log into an account via username and password
+      description: >-
+        Used to log into an existing account, creating a new [account
+        token](#/components/schemas/AccountToken).
+      parameters:
+        - name: username
+          required: true
+          in: query
+          schema:
+            type: string
+            example: user@example.com
+        - name: password
+          required: true
+          in: query
+          schema:
+            type: string
+            example: sTr00nkP4$$wOrD
+      responses:
+        '200':
+          description: Logged in successfully. A new token is returned
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AccountToken'
+        '403':
+          description: wrong credentials
+        '429':
+          description: too many requests
+  /api/account/status:
+    get:
+      tags:
+        - account
+      summary: Check token status
+      description: Used to check the state the account is in and the account username. To learn more about account statuses, see [AccountStatus](#/components/schemas/AccountStatus).
+      parameters:
+        - name: token
+          required: true
+          in: cookie
+          schema:
+            type: string
+            example: 12345:abcdefghij-klmnopqrst-uvwxyzabcd
+      responses:
+        '200':
+          description: Token is valid. Username and status are returned
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AccountStatus'
+        '403':
+          description: forbidden
+  /api/account/changePassword:
+    put:
+      tags:
+        - account
+      summary: Change account password
+      description: >-
+        In order to work, *old_password* must be correct and *new_password* must
+        be valid. Changing password deletes older tokens, signing
+        out other devices. A new token will be returned on success to be used by the user's device.
+      parameters:
+        - name: token
+          required: true
+          in: cookie
+          schema:
+            type: string
+            example: 12345:abcdefghij-klmnopqrst-uvwxyzabcd
+        - name: old_password
+          required: true
+          in: query
+          schema:
+            type: string
+            example: weakpassword
+        - name: new_password
+          required: true
+          in: query
+          schema:
+            type: string
+            example: sTr00nkerP4$$wOrD
+      responses:
+        '200':
+          description: Password changed successfully, a new token is generated and returned to the client, older tokens are deleted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AccountToken'
+        '400':
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationError'
+        '403':
+          description: Wrong credentials
+        '429':
+          description: Too many requests
+  /api/account/getProfile:
+    get:
+      tags:
+        - account
+      summary: Get profile information
+      description: test
+      parameters:
+        - name: token
+          required: true
+          in: cookie
+          schema:
+            type: string
+            example: 12345:abcdefghij-klmnopqrst-uvwxyzabcd
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AccountProfile'
+        '403':
+          description: Forbidden
+  /api/account/updateProfile:
+    patch:
+      tags:
+        - account
+      summary: updates profile information
+      description: Updates general personal information in the user's profile. Username is not allowed to be changed since it acts as the identifier of the user.
+      parameters:
+        - name: token
+          required: true
+          in: cookie
+          schema:
+            type: string
+            example: 12345:abcdefghij-klmnopqrst-uvwxyzabcd
+        - name: first_name
+          required: false
+          in: query
+          schema:
+            type: string
+          example: Kevin
+        - name: last_name
+          required: false
+          in: query
+          schema:
+            type: string
+          example: Costner
+        - name: resume
+          required: false
+          in: query
+          schema:
+            type: string
+          example: >-
+            Creative and innovative UX designer with 4+ years of experience in
+            designing user interfaces.
+      responses:
+        '200':
+          description: Information has been successfully changed 
+        '400':
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationError'
+        '403':
+          description: Forbidden
+  /api/account/info/{username}:
+    get:
+      tags:
+        - account
+      summary: Get information about a registered account
+      description: .
+      parameters:
+        - name: token
+          required: true
+          in: cookie
+          schema:
+            type: string
+            example: 12345:abcdefghij-klmnopqrst-uvwxyzabcd
+        - name: username
+          required: true
+          in: path
+          schema:
+            type: string
+            example: user@example.com
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AccountProfile'
+        '403':
+          description: Forbidden (token invalid or user is not admin)
+        '404':
+          description: 'User not found'
+  /api/account/suspend/{username}:
+    put:
+      tags:
+      - account
+      summary: Suspend user's account
+      description: Can be used to block user account for violation or for security reasons. Silent suspension prevents user notification via email. *force_password_change=true* cannot be used together with *silent=true* since the user is supposed to receive the password reset link via email. Setting *hours* to *0* will make suspension permanent until manual interference. In order to simply force the user to change their password without blocking the account, set *hours* to *0*. *message* corresponds to the suspension reason that will be included in the notification email (*silent* must be *false* to use this).
+      parameters:
+        - name: token
+          required: true
+          in: cookie
+          schema:
+            type: string
+            example: 12345:abcdefghij-klmnopqrst-uvwxyzabcd
+        - name: username
+          required: true
+          in: path
+          schema:
+            type: string
+            example: user@example.com
+        - name: silent
+          required: false
+          in: query
+          schema:
+            type: boolean
+            example: false
+            default: false
+        - name: force_password_change
+          required: false
+          in: query
+          schema:
+            type: boolean
+            example: false
+            default: false
+        - name: hours
+          required: false
+          in: query
+          schema:
+            type: integer
+            example: 24
+            default: -1
+        - name: strip_beta_access
+          required: false
+          in: query
+          schema:
+            type: boolean
+            example: false
+            default: false
+        - name: message
+          required: false
+          in: query
+          schema:
+            type: string
+            example: Suspicious activity
+            default: Reason not specified
+          
+      responses:
+        '200':
+          description: 'User suspended successfully'
+        '403':
+          description: 'Forbidden (token invalid or user is not admin)'
+        '404':
+          description: 'User not found'
+        '409':
+          description: 'Conflicting suspension parameters'
+  /api/account/pardon/{username}:
+    put:
+      tags:
+      - account
+      summary: Cancel account suspension
+      description: Unlock the user account if it was suspended. By default, this will return beta access rights to the user if they had them before the suspension.
+      parameters:
+        - name: token
+          required: true
+          in: cookie
+          schema:
+            type: string
+            example: 12345:abcdefghij-klmnopqrst-uvwxyzabcd
+        - name: username
+          required: true
+          in: path
+          schema:
+            type: string
+            example: user@example.com
+        - name: silent
+          required: false
+          in: query
+          schema:
+            type: boolean
+            example: false
+            default: false
+        - name: unstrip_beta_access
+          in: query
+          schema:
+            type: boolean
+            example: true
+            default: true
+        - name: message
+          required: false
+          in: query
+          schema:
+            type: string
+            example: Please, do not allow your cat on the keyboard again.
+            default:
+          
+      responses:
+        '200':
+          description: 'User suspended successfully'
+        '403':
+          description: 'Forbidden (token invalid or user is not admin)'
+        '404':
+          description: 'User not found'
+        '409':
+          description: 'Conflicting suspension parameters'
+  /api/beta/generateDownloadLink:
+    put:
+      tags:
+      - beta
+      summary: Request a download link for the application
+      description: This will generate a temporary download link associated with the user's account. By default, the link will expire in 2 hours. Every new request automatically disables the existing link if it was created less than 2 hours ago. Single IP address is allowed to use the generated link. IP addresses used to access the download link are logged.
+      parameters:
+        - name: token
+          required: true
+          in: cookie
+          schema:
+            type: string
+            example: 12345:abcdefghij-klmnopqrst-uvwxyzabcd
+      responses:
+        '200':
+          description: Link has been got successfully
+          content:
+            application/json:
+              schema:
+                type: string
+                example: https://domain.example/d/I8EaXjB3
+        '403':
+          description: Forbidden
+  /api/beta/stats:
+    get:
+      tags:
+      - beta
+      summary: Get beta test statistics 
+      description: User's account will be put into the rejected state temporarily before their account moves to the stale state and can be used to apply again.
+      parameters:
+        - name: token
+          required: true
+          in: cookie
+          schema:
+            type: string
+            example: 12345:abcdefghij-klmnopqrst-uvwxyzabcd
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BetaStats'
+        '403':
+          description: 'Forbidden (token invalid or user is not admin)'
+        '404':
+          description: 'User not found'
+  /api/beta/UserRange:
+    get:
+      tags:
+      - beta
+      summary: Get an array of users from the beta queue or from the active user list
+      description: Get an array of users from the beta test queue or from the list of users who have been granted beta access. Maximum of 100 users can be returned at the same time. By default, the first users are returned if no range parameters are set.
+      parameters:
+        - name: token
+          required: true
+          in: cookie
+          schema:
+            type: string
+            example: 12345:abcdefghij-klmnopqrst-uvwxyzabcd
+        - name: queue_name
+          required: true
+          in: query
+          schema:
+            type: string
+            example: beta
+            description: beta or active
+        - name: from
+          required: false
+          in: query
+          schema:
+            type: integer
+        - name: to
+          required: false
+          in: query
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/AccountProfile'
+        '403':
+          description: Forbidden
+  /api/beta/approve/{username}:
+    put:
+      tags:
+      - beta
+      summary: Approve user's access to the beta test program
+      description: User will be granted beta test access and will be able to access the application download link, as well as the private development blog.
+      parameters:
+        - name: token
+          required: true
+          in: cookie
+          schema:
+            type: string
+            example: 12345:abcdefghij-klmnopqrst-uvwxyzabcd
+        - name: username
+          required: true
+          in: path
+          schema:
+            type: string
+            example: user@example.com
+      responses:
+        '200':
+          description: 'User approved successfully'
+        '403':
+          description: 'Forbidden (token invalid or user is not admin)'
+        '404':
+          description: 'User not found'
+  /api/beta/reject/{username}:
+    put:
+      tags:
+      - beta
+      summary: Reject user's application for beta test
+      description: User's account will be put into the rejected state temporarily before their account moves to the stale state and can be used to apply again.
+      parameters:
+        - name: token
+          required: true
+          in: cookie
+          schema:
+            type: string
+            example: 12345:abcdefghij-klmnopqrst-uvwxyzabcd
+        - name: username
+          required: true
+          in: path
+          schema:
+            type: string
+            example: user@example.com
+      responses:
+        '200':
+          description: 'User rejected successfully'
+        '403':
+          description: 'Forbidden (token invalid or user is not admin)'
+        '404':
+          description: 'User not found'
+  
+components:
+  schemas:
+    AccountProfile:
+      required:
+        - username
+        - first_name
+        - last_name
+        - resume
+        - beta_access
+        - beta_queue_position
+        - suspended
+        - suspended_until
+        - suspended_reason
+      type: object
+      properties:
+        username:
+          type: string
+          example: user@example.com
+        first_name:
+          type: string
+          example: Kevin
+        last_name:
+          type: string
+          example: Costner
+        resume:
+          type: string
+          example: Creative and innovative UX designer with 4+ years of experience in designing user interfaces.
+        beta_access:
+          type: boolean
+          example: true
+        beta_queue_position:
+          type: integer
+        suspended:
+          type: boolean
+          example: false
+        suspended_until:
+          type: integer
+          example: 1846040400
+        suspended_reason:
+          type: string
+          example: General unprofessionalism, odor
+      description: Represents complete personal information displayed in the user profile.
+    AccountStatus:
+      required:
+        - username
+        - status
+      type: object
+      properties:
+        username:
+          type: string
+          example: user@example.com
+        status:
+          type: string
+          example: in_queue
+      description: 
+        "AccountStatus is used to determine whether a session exists for a given
+        token and provides the account username (email) and status.
+         <br>Existing statuses are:
+         <ul>
+          <li>**confirm_email** - account is created but the email address has not yet been verified.</li>
+          <li>**in_queue** - account is activated, but the application is yet in queue;</li>
+          <li>**active** - account is activated and the application was accepted, beta test access is granted;</li>
+          <li>**rejected** - account is activated, but the application was rejected. Applying again is temporary unavailable;</li>
+          <li>**stale** - account is activated, but is stale since the previous application was rejected and a new one has not yet been made. The account in this state will be deleted in 1 month if new resume will not be submitted on time.</li>
+          <li>**suspended** - account was terminated for violation or for security reasons. It is not possible to interact with the account any further. The issue must be resolved by contacting the administrator via email. However, an email with instructions is provided when resolution does not require interaction with the administrator.
+         </ul>
+         The user is normally notified by email when the status of their account changes when it is necessary.
+         "
+    AccountToken:
+      required:
+        - token
+      type: object
+      properties:
+        token:
+          type: string
+          example: 12345:abcdefghij-klmnopqrst-uvwxyzabcd
+      description: >-
+        Tokens are used to interact with accounts they are tied to. They are
+        strings, formatted as W:X-Y-Z, where W is the account number identifier
+        and X, Y, Z are 10-sign sequences of numbers and letters (lowercase and
+        uppercase). Each time a user logs in, a new token is generated for them.
+        Up to 20 tokens can be stored for a single account. When the user changes the password, all existing tokens are deleted and a new token is returned.
+    BetaStats:
+      required:
+        - active_amount
+        - active_new_today
+        - active_new_thisweek
+        - active_new_thismonth
+        - active_new_thisyear
+        - queue_amount
+        - queue_average_time
+        - queue_new_today
+        - queue_new_thisweek
+        - queue_new_thismonth
+        - queue_new_thisyear
+      description: Represents different statistics related to the beta test program, including active (accepted) users and the beta test queue.
+      type: object
+      properties:
+        active_amount:
+          type: integer
+          example: 129
+          description: Total amount of active users
+        active_new_today:
+          type: integer
+          example: 4
+          description: New accepted members today
+        active_new_thisweek:
+          type: integer
+          example: 23
+          description: New accepted members this week
+        active_new_thismonth:
+          type: integer
+          example: 97
+          description: New accepted members this month
+        active_new_thisyear:
+          type: integer
+          example: 421
+          description: New accepted members this year
+        queue_amount:
+          type: integer
+          example: 129
+          description: Total amount of users in the beta test queue
+        queue_average_time:
+          type: number
+          format: double
+          example: 123.155
+          description: Average wait time before an application gets reviewed
+        queue_new_today:
+          type: integer
+          example: 4
+          description: New queue members today
+        queue_new_thisweek:
+          type: integer
+          example: 23
+          description: New queue members this week
+        queue_new_thismonth:
+          type: integer
+          example: 97
+          description: New queue members this month
+        queue_new_thisyear:
+          type: integer
+          example: 421
+          description: New queue members this year
+    ValidationError:
+      required:
+        - field
+      type: object
+      properties:
+        field:
+          type: string
+          example: password
+          description: Name of the field where validation error occurred
+        description:
+          type: string
+          example: Password must be at least 8 characters long.
+          description: Information about the error (if available)
+      description: Used to provide information on incorrect user input
+externalDocs:
+  url: https://www.youtube.com/watch?v=dQw4w9WgXcQ
+  description: External documentation
