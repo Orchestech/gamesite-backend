@@ -2,9 +2,10 @@ const express = require('express');
 const {query,validationResult} = require('express-validator')
 const crypto = require('crypto');
 const {db, pgp} = require.main.require('../database/db');
+const mailer = require.main.require('../smtp/smtp');
 const router = express.Router();
 
-router.use(express.json());
+//router.use(express.json());
 
 const registerValidationRules = [
       query('username').trim().isEmail(),
@@ -22,9 +23,8 @@ router.post('/', registerValidationRules, async (req, res) => {
     }
 
     try {
-        const username = req.query.username.trim().toLowerCase();
-
         // Check if username already exists
+        const username = req.query.username.trim().toLowerCase();
         const existingUser = await db.any('SELECT * FROM users WHERE username = $1', [username]);
         if (existingUser.length > 0) {
             return res.status(409).json({ errors: [{ msg: 'Username already exists' }] });
@@ -38,7 +38,6 @@ router.post('/', registerValidationRules, async (req, res) => {
             [username, req.query.password, false, false, activationDeadline]);
 
         const userId = newUser.id;
-        //console.log(`Registered account with id: ${userId}`);
 
         // Insert activation key
         await db.any('INSERT INTO activationkeys (user_id, key, force_password_change) VALUES ($1, $2, $3) RETURNING id',
