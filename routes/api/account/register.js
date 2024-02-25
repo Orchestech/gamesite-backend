@@ -1,11 +1,13 @@
-var express = require('express');
-var router = express.Router();
-var sql = require('../../../database/db');
+const express = require('express');
+const router = express.Router();
+const pg = require.main.require('../database/db');
+router.post('/', function(req, res, next) {
 
-router.get('/', function(req, res, next) {
+    try {
 
-    res.statusCode = 501
-    res.send("Not implemented");
+    } catch (error) {
+
+    }
 });
 
 module.exports = router;
