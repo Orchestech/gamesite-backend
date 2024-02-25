@@ -1,6 +1,7 @@
 const express = require('express');
 const {query,validationResult} = require('express-validator')
 const crypto = require('crypto');
+const bcrypt = require("bcrypt");
 const {db, pgp} = require.main.require('../database/db');
 const mailer = require.main.require('../smtp/smtp');
 const router = express.Router();
@@ -30,12 +31,14 @@ router.post('/', registerValidationRules, async (req, res) => {
             return res.status(409).json({ errors: [{ msg: 'Username already exists' }] });
         }
 
+        const hashedPassword = await bcrypt.hash(req.query.password, 10);
+        console.log(hashedPassword);
         const activationDeadline = new Date().getTime() + 172800;
         const activationKey = crypto.randomUUID();
 
         // Insert new user
         const newUser = await db.one('INSERT INTO users (username, password, admin, activated, activation_deadline) VALUES ($1, $2, $3, $4, $5) RETURNING id',
-            [username, req.query.password, false, false, activationDeadline]);
+            [username, hashedPassword, false, false, activationDeadline]);
 
         const userId = newUser.id;
 
