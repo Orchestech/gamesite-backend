@@ -1,10 +1,14 @@
 const express = require('express');
 const {query,validationResult} = require('express-validator')
+
 const crypto = require('crypto');
 const bcrypt = require("bcrypt");
+
 const {db, pgp} = require.main.require('../database/db');
+
 const nodemailer = require('nodemailer');
 const {mailerOptions, mailerFrom} = require.main.require('../smtp/smtp');
+
 const router = express.Router();
 
 //router.use(express.json());
