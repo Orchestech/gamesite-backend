@@ -8,4 +8,9 @@ function tokenSign(userId) {
     return jwt.sign({ userId }, jwtSecret, { expiresIn: jwtExpireTime });
 }
 
-module.exports = {tokenSign}
+function tokenVerify(token) {
+    return jwt.verify(token, jwtSecret);
+}
+
+
+module.exports = {tokenSign, tokenVerify}

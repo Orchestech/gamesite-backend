@@ -1,9 +1,8 @@
 const express = require('express');
-const {query,validationResult} = require('express-validator')
-
 const crypto = require('crypto');
-const bcrypt = require("bcrypt");
-
+const {validationRules, validationResult} = require.main.require('../validation/validation');
+const {hashPassword} = require.main.require('../auth/password-hasher');
+const {tokenSign} = require.main.require('../auth/jwt');
 const {db, pgp} = require.main.require('../database/db');
 
 const nodemailer = require('nodemailer');
@@ -11,17 +10,7 @@ const {mailerOptions, mailerFrom} = require.main.require('../smtp/smtp');
 
 const router = express.Router();
 
-//router.use(express.json());
-
-const registerValidationRules = [
-      query('username').trim().isEmail(),
-      query('password').isLength({min: 6, max: 32}),
-      query('first_name').trim().notEmpty(),
-      query('last_name').trim().notEmpty(),
-      query('resume').trim().isLength({ min: 25, max: 2000 })
-];
-
-router.post('/', registerValidationRules, async (req, res) => {
+router.post('/', validationRules.accountRegistration, async (req, res) => {
 
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
@@ -33,10 +22,10 @@ router.post('/', registerValidationRules, async (req, res) => {
         const username = req.query.username.trim().toLowerCase();
         const existingUser = await db.any('SELECT * FROM users WHERE username = $1', [username]);
         if (existingUser.length > 0) {
-            return res.status(409).json({ errors: [{ msg: 'Username already exists' }] });
+            return res.status(409).json({ message: "Validation Error", errors: [{ msg: 'Username already exists' }] });
         }
 
-        const hashedPassword = await bcrypt.hash(req.query.password, 10);
+        const hashedPassword = await hashPassword(req.query.password);
         const activationDeadline = new Date().getTime() + 172800;
         const activationKey = crypto.randomUUID();
 
@@ -64,10 +53,10 @@ router.post('/', registerValidationRules, async (req, res) => {
             }
         });
 
-        res.status(200).json({ message: 'User registered successfully' });
+        res.status(200).json({ message: 'User registered successfully', token: tokenSign(userId) });
     } catch (error) {
         console.error(error);
-        res.status(500).json({ errors: [{ msg: 'Server error' }] });
+        res.status(500).json({ message: "Error occurred", errors: [{ msg: 'Server error' }] });
     }
 });
 
