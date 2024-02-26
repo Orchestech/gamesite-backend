@@ -10,6 +10,7 @@ var usersRouter = require('./routes/users');
 
 //RESTful API
 var accountRegister = require('./routes/api/account/register');
+var accountActivate = require('./routes/api/account/activate');
 
 var app = express();
 
@@ -27,6 +28,7 @@ app.use('/', indexRouter);
 app.use('/users', usersRouter);
 
 app.use('/api/account/register', accountRegister);
+app.use('/api/account/activate', accountActivate);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {

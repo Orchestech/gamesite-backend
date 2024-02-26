@@ -1,7 +1,6 @@
 const express = require('express');
 const {validationRules, validationResult} = require.main.require('../validation/validation');
 
-const {tokenVerify} = require.main.require('../auth/jwt');
 const {db, pgp} = require.main.require('../database/db');
 
 const router = express.Router();
