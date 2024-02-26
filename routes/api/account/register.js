@@ -2,7 +2,6 @@ const express = require('express');
 const {query,validationResult} = require('express-validator')
 const crypto = require('crypto');
 const bcrypt = require("bcrypt");
-const {mailer_from} = require.main.require("../smtp/smtp");
 const {db, pgp} = require.main.require('../database/db');
 const nodemailer = require('nodemailer');
 const {mailerOptions, mailerFrom} = require.main.require('../smtp/smtp');
@@ -50,7 +49,7 @@ router.post('/', registerValidationRules, async (req, res) => {
         // Send account activation email
         const transporter = nodemailer.createTransport(mailerOptions);
         await transporter.sendMail({
-           from: mailer_from,
+           from: mailerFrom,
            to: username,
            subject: 'Gamesite registration',
            text: `Hi, ${req.query.first_name} ${req.query.last_name}!\nActivate your account by clicking the link below: https://rukolf.team/account/activate/${activationKey}`
