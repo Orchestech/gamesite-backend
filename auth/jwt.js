@@ -9,8 +9,11 @@ function tokenSign(userId) {
 }
 
 function tokenVerify(token) {
-    return jwt.verify(token, jwtSecret);
+    try {
+        return jwt.verify(token, jwtSecret);
+    } catch (error) {
+        return false;
+    }
 }
-
 
 module.exports = {tokenSign, tokenVerify}
