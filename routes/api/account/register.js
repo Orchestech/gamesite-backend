@@ -53,7 +53,7 @@ router.post('/', validationRules.accountRegistration, async (req, res) => {
             }
         });
 
-        res.status(200).json({ message: 'User registered successfully', token: tokenSign(userId) });
+        res.status(200).json({ message: 'User registered successfully', token: tokenSign(username) });
     } catch (error) {
         console.error(error);
         res.status(500).json({ message: "Error occurred", errors: [{ msg: 'Server error' }] });

@@ -12,6 +12,11 @@ const validationRules = {
     accountActivation:
     [
       query('code').notEmpty()
+    ],
+    accountLogin:
+    [
+      query('username').trim().notEmpty(),
+      query('password').trim().notEmpty()
     ]
 };
 
