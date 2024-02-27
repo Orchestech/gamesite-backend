@@ -11,7 +11,7 @@ const validationRules = {
     ],
     accountActivation:
     [
-      param('code').notEmpty()
+      query('code').notEmpty()
     ]
 };
 

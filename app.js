@@ -4,15 +4,15 @@ var path = require('path');
 var cookieParser = require('cookie-parser');
 var logger = require('morgan');
 
+var app = express();
+
 //Stock routers
 var indexRouter = require('./routes/index');
 var usersRouter = require('./routes/users');
 
 //RESTful API
-var accountRegister = require('./routes/api/account/register');
 var accountActivate = require('./routes/api/account/activate');
-
-var app = express();
+var accountRegister = require('./routes/api/account/register');
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
@@ -27,8 +27,9 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use('/', indexRouter);
 app.use('/users', usersRouter);
 
-app.use('/api/account/register', accountRegister);
 app.use('/api/account/activate', accountActivate);
+app.use('/api/account/register', accountRegister);
+
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {

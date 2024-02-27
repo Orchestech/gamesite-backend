@@ -5,7 +5,7 @@ const {db, pgp} = require.main.require('../database/db');
 
 const router = express.Router();
 
-router.post('/', validationRules.accountActivation, async (req, res) => {
+router.put('/', validationRules.accountActivation, async (req, res) => {
 
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
@@ -22,11 +22,11 @@ router.post('/', validationRules.accountActivation, async (req, res) => {
         }
 
         // Activate user and remove activation key
-        const userId = await db.one('SELECT user_id FROM activationkeys WHERE key = $1', [activationKey]);
+        const userId = await db.one('SELECT user_id FROM activationkeys WHERE key = $1', [activationKey], a => a.user_id);
         await db.none('UPDATE users SET activated = true WHERE id = $1', [userId]);
         await db.none('DELETE FROM activationkeys WHERE key = $1', [activationKey]);
 
-        res.status(200).json({ message: "Success" });
+        res.status(200).json({ message: "Successfully activated user" });
     } catch (error) {
         console.error(error);
         res.status(500).json({ message: "Error occurred", errors: [{ msg: 'Server error' }] });
