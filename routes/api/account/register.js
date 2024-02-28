@@ -23,7 +23,7 @@ router.post('/', validationRules.accountRegistration, async (req, res) => {
         const username = req.query.username.trim().toLowerCase();
         const existingUser = await db.any('SELECT * FROM users WHERE username = $1', [username]);
         if (existingUser.length > 0) {
-            return res.status(409).json({ message: "Validation Error", errors: [{ msg: 'Username already exists' }] });
+            return res.status(409).json({ message: "Username conflict", errors: [{ msg: 'Username already exists' }] });
         }
 
         const password = req.query.password;

@@ -20,7 +20,13 @@ router.post('/', validationRules.accountLogin, async (req, res) => {
         const username = req.query.username.trim().toLowerCase();
         const password = req.query.password;
 
-        const user = await controller.getUserByUsername(username);
+        let user;
+        try {
+            user = await controller.getUserByUsername(username);
+        } catch (error) {
+            return res.status(404).json({ message: "Invalid username or password", errors: [{ msg: 'Invalid username or password' }] });
+        }
+
         const hashedPassword = user.password;
 
         if (!await verifyPassword(password, hashedPassword)) {
@@ -29,7 +35,7 @@ router.post('/', validationRules.accountLogin, async (req, res) => {
 
         const newToken = tokenSign(user.id);
 
-        res.status(200).json({ message: "Successfully activated user", token: newToken });
+        res.status(200).json({ message: "Successfully logged in", token: newToken });
     } catch (error) {
         console.error(error);
         res.status(500).json({ message: "Error occurred", errors: [{ msg: 'Server error' }] });

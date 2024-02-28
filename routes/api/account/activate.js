@@ -39,7 +39,7 @@ router.put('/', validationRules.accountActivation, async (req, res) => {
         await controller.patchObject('users', user.id, {activated: true});
 
         // Delete key
-        await controller.deleteObject('activation_keys', key.id);
+        await controller.deleteObject('activationkeys', key.id);
 
         res.status(200).json({ message: "Successfully activated user" });
     } catch (error) {

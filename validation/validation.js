@@ -23,6 +23,12 @@ const validationRules = {
       query('old_password').notEmpty(),
       query('new_password').notEmpty().isLength({min: 6, max: 32})
     ],
+    accountUpdateProfile:
+    [
+      query('first_name').trim().notEmpty(),
+      query('last_name').trim().notEmpty(),
+      query('resume').trim().isLength({ min: 25, max: 2000 })
+    ],
     accountToken:
     [
       header('token').notEmpty()
