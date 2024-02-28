@@ -18,6 +18,11 @@ const validationRules = {
       query('username').trim().notEmpty(),
       query('password').trim().notEmpty()
     ],
+    accountChangePassword:
+    [
+      query('old_password').notEmpty(),
+      query('new_password').notEmpty().isLength({min: 6, max: 32})
+    ],
     accountToken:
     [
       header('token').notEmpty()

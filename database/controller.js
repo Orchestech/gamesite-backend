@@ -46,17 +46,17 @@ async function getActivationKeyByKey(key) {
     return await db.one('SELECT * FROM activationkeys WHERE key = $1', [key]);
 }
 
-async function deleteActivationKeyById(key_id) {
-    return await db.none('DELETE FROM activationkeys WHERE id = $1', [key_id]);
-}
-
 async function patchObject(table, id, object) {
     return await db.none(`UPDATE ${table} SET ${Object.keys(object).map(key => `${key} = $${Object.keys(object).indexOf(key) + 2}`)} WHERE id = $1`, [id, ...Object.values(object)]);
+}
+
+async function deleteObject(table, id) {
+    return await db.none(`DELETE FROM ${table} WHERE id = $1`, [id]);
 }
 
 module.exports = {
     createUser, getUserById, getUserByUsername,
     createProfile, getProfileByUserId,
-    createActivationKey, getActivationKeyById, getActivationKeyByUserId, getActivationKeyByKey, deleteActivationKeyById,
-    patchObject
+    createActivationKey, getActivationKeyById, getActivationKeyByUserId, getActivationKeyByKey,
+    patchObject, deleteObject
 }

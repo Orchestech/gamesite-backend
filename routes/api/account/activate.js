@@ -18,6 +18,7 @@ router.put('/', validationRules.accountActivation, async (req, res) => {
         // Check if activation key exists
         const activationKey = req.query.code;
 
+        // Retrieve key object from the database
         let key;
         try {
             key = await controller.getActivationKeyByKey(activationKey);
@@ -25,6 +26,7 @@ router.put('/', validationRules.accountActivation, async (req, res) => {
             return res.status(401).json({ message: "Activation key is invalid", errors: [{ msg: 'Invalid activation key' }] });
         }
 
+        // Retrieve user from the database
         let user;
         try {
             user = await controller.getUserById(key.user_id);
@@ -33,19 +35,11 @@ router.put('/', validationRules.accountActivation, async (req, res) => {
             return res.status(401).json({ message: "Activation key is invalid", errors: [{ msg: 'Invalid activation key' }] });
         }
 
+        // Activate user
         await controller.patchObject('users', user.id, {activated: true});
 
-        //const key = await db.any('SELECT * FROM activationkeys WHERE key = $1', [activationKey]);
-
-        // if (keys.length === 0) {
-        //     return res.status(401).json({ message: "Activation key is invalid", errors: [{ msg: 'Invalid activation key' }] });
-        // }
-
-        // Activate user and remove activation key
-        // const userId = await db.one('SELECT user_id FROM activationkeys WHERE key = $1', [activationKey], a => a.user_id);
-
-        //await db.none('UPDATE users SET activated = true WHERE id = $1', [user.id]);
-        //await db.none('DELETE FROM activationkeys WHERE key = $1', [activationKey]);
+        // Delete key
+        await controller.deleteObject('activation_keys', key.id);
 
         res.status(200).json({ message: "Successfully activated user" });
     } catch (error) {

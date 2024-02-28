@@ -16,7 +16,7 @@ var accountActivate = require('./routes/api/account/activate');
 var accountLogin = require('./routes/api/account/login');
 var accountStatus = require('./routes/api/account/status');
 var accountGetProfile = require('./routes/api/account/getProfile');
-
+var accountChangePassword = require('./routes/api/account/changePassword');
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'jade');
@@ -35,7 +35,7 @@ app.use('/api/account/activate', accountActivate);
 app.use('/api/account/login', accountLogin);
 app.use('/api/account/status', accountStatus);
 app.use('/api/account/getProfile', accountGetProfile);
-
+app.use('/api/account/changePassword', accountChangePassword);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {

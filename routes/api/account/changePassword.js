@@ -1,13 +1,14 @@
 const express = require('express');
 const {validationRules, validationResult} = require.main.require('../validation/validation');
 
-const {tokenVerify} = require.main.require('../auth/jwt');
 const {db, pgp} = require.main.require('../database/db');
 const controller = require.main.require('../database/controller');
+const {tokenSign, tokenVerify} = require.main.require('../auth/jwt');
+const {hashPassword, verifyPassword} = require.main.require('../auth/password-hasher');
 
 const router = express.Router();
 
-router.get('/', validationRules.accountToken, async (req, res) => {
+router.put('/', validationRules.accountChangePassword, async (req, res) => {
 
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
@@ -17,25 +18,25 @@ router.get('/', validationRules.accountToken, async (req, res) => {
     try {
 
         const username = tokenVerify(req.headers.token).userId;
-
         if (!username) {
             return res.status(401).json({ message: "Invalid token", errors: [{ msg: 'Invalid token' }] });
         }
 
-        const user = await controller.getUserByUsername(username);
-        const profile = await controller.getProfileByUserId(user.id);
+        const oldPassword = req.query.old_password;
+        const newPassword = req.query.new_password;
 
-        const userData = {
-            first_name: profile.first_name,
-            last_name: profile.last_name,
-            resume: profile.resume,
-            username: user.username,
-            activated: user.activated,
-            activation_deadline: user.activation_deadline
+        const user = await controller.getUserByUsername(username);
+        const hashedPassword = user.password;
+
+        if (!await verifyPassword(oldPassword, hashedPassword)) {
+            return res.status(401).json({ message: "Invalid username or password", errors: [{ msg: 'Invalid username or password' }] });
         }
 
-        console.log(userData);
-        res.status(200).json(userData);
+        const newPasswordHashed = await hashPassword(newPassword);
+
+        await controller.patchObject('users', user.id, {password: newPasswordHashed});
+
+        res.status(200).json({ message: "Successfully updated password", token: tokenSign(username) });
     } catch (error) {
         console.error(error);
         res.status(500).json({ message: "Error occurred", errors: [{ msg: 'Server error' }] });
