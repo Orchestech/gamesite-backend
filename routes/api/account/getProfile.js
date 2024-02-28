@@ -2,6 +2,7 @@ const express = require('express');
 const {validationRules, validationResult} = require.main.require('../validation/validation');
 
 const {tokenVerify} = require.main.require('../auth/jwt');
+const {db, pgp} = require.main.require('../database/db');
 
 const router = express.Router();
 
@@ -20,7 +21,7 @@ router.get('/', validationRules.accountToken, async (req, res) => {
             return res.status(401).json({ message: "Invalid username or password", errors: [{ msg: 'Invalid username or password' }] });
         }
 
-        res.status(200).json({ message: "Logged in", username: username });
+        // res.status(200).json({ message: "Logged in", username: username });
     } catch (error) {
         console.error(error);
         res.status(500).json({ message: "Error occurred", errors: [{ msg: 'Server error' }] });

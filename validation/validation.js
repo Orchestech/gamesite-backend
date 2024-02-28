@@ -18,7 +18,7 @@ const validationRules = {
       query('username').trim().notEmpty(),
       query('password').trim().notEmpty()
     ],
-    accountStatus:
+    accountToken:
     [
       header('token').notEmpty()
     ]
