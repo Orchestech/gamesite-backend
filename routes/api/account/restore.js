@@ -3,10 +3,12 @@ const {validationRules, validationResult} = require.main.require('../validation/
 
 const {db, pgp} = require.main.require('../database/db');
 const controller = require.main.require('../database/controller');
+const {hashPassword} = require.main.require('../auth/password-hasher');
+const {tokenSign} = require.main.require('../auth/jwt');
 
 const router = express.Router();
 
-router.put('/', validationRules.accountActivation, async (req, res) => {
+router.put('/', validationRules.accountRestoration, async (req, res) => {
 
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
@@ -23,13 +25,13 @@ router.put('/', validationRules.accountActivation, async (req, res) => {
         try {
             key = await controller.getActivationKeyByKey(activationKey);
         } catch (error) {
-            return res.status(401).json({ message: "Activation key is invalid", errors: [{ msg: 'Invalid activation key' }] });
+            return res.status(400).json({ message: "Restoration key is invalid", errors: [{ msg: 'Invalid restoration key' }] });
         }
 
-        // Check if key is intended to be used for account restoration (not activation)
-        if (key.force_password_change)
+        // Check if key is unintended to be used for account restoration
+        if (!key.force_password_change)
         {
-            return res.status(409).json({ message: "Use account/restore instead", errors: [{ msg: 'This key requires password reset' }] });
+            return res.status(409).json({ message: "Use account/activate instead", errors: [{ msg: 'This key does not require password' }] });
         }
 
         // Retrieve user from the database
@@ -41,13 +43,17 @@ router.put('/', validationRules.accountActivation, async (req, res) => {
             return res.status(401).json({ message: "Activation key is invalid", errors: [{ msg: 'Invalid activation key' }] });
         }
 
-        // Activate user
-        await controller.patchObject('users', user.id, {activated: true});
+        // Activate user and change password
+        const newPassword = await hashPassword(req.query.password);
+        const lastPasswordChange = new Date()-5;
+        await controller.patchObject('users', user.id, {activated: true, password: newPassword, last_password_change: lastPasswordChange});
 
         // Delete key
         await controller.deleteObject('activationkeys', key.id);
 
-        res.status(200).json({ message: "Successfully activated user" });
+        // Give user their new token
+        const newToken = await tokenSign(user.id);
+        res.status(200).json({ message: "Successfully restored account", token: newToken });
     } catch (error) {
         console.error(error);
         res.status(500).json({ message: "Error occurred", errors: [{ msg: 'Server error' }] });

@@ -13,6 +13,7 @@ var usersRouter = require('./routes/users');
 //RESTful API
 var accountRegister = require('./routes/api/account/register');
 var accountActivate = require('./routes/api/account/activate');
+var accountRestore = require('./routes/api/account/restore');
 var accountLogin = require('./routes/api/account/login');
 var accountStatus = require('./routes/api/account/status');
 var accountGetProfile = require('./routes/api/account/getProfile');
@@ -34,6 +35,7 @@ app.use('/users', usersRouter);
 
 app.use('/api/account/register', accountRegister);
 app.use('/api/account/activate', accountActivate);
+app.use('/api/account/restore', accountRestore);
 app.use('/api/account/login', accountLogin);
 app.use('/api/account/status', accountStatus);
 app.use('/api/account/getProfile', accountGetProfile);

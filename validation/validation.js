@@ -3,7 +3,7 @@ const {query, body, param, cookie, header, check, validationResult} = require('e
 const validationRules = {
     accountRegistration:
     [
-      query('username').trim().isEmail(),
+      query('username').trim().toLowerCase().isEmail(),
       query('password').isLength({min: 6, max: 32}),
       query('first_name').trim().notEmpty(),
       query('last_name').trim().notEmpty(),
@@ -13,9 +13,14 @@ const validationRules = {
     [
       query('code').notEmpty()
     ],
+    accountRestoration:
+    [
+      query('code').notEmpty(),
+      query('password').isLength({min: 6, max: 32})
+    ],
     accountLogin:
     [
-      query('username').trim().notEmpty(),
+      query('username').trim().toLowerCase().notEmpty(),
       query('password').trim().notEmpty()
     ],
     accountChangePassword:
