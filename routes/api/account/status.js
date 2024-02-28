@@ -17,7 +17,7 @@ router.get('/', validationRules.accountToken, async (req, res) => {
         const username = tokenVerify(req.headers.token);
 
         if (!username) {
-            return res.status(401).json({ message: "Invalid username or password", errors: [{ msg: 'Invalid username or password' }] });
+            return res.status(401).json({ message: "Invalid token", errors: [{ msg: 'Invalid token' }] });
         }
 
         res.status(200).json({ message: "Logged in", username: username });
