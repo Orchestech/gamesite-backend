@@ -1,7 +1,6 @@
 const {db, pgp} = require.main.require('../database/db');
 const crypto = require('crypto');
 const {hashPassword, verifyPassword} = require.main.require('../auth/password-hasher');
-const {tokenSign, tokenVerify} = require.main.require('../auth/jwt');
 
 async function createUser(username, password) {
 

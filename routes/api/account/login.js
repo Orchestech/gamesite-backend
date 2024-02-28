@@ -27,7 +27,9 @@ router.post('/', validationRules.accountLogin, async (req, res) => {
             return res.status(401).json({ message: "Invalid username or password", errors: [{ msg: 'Invalid username or password' }] });
         }
 
-        res.status(200).json({ message: "Successfully activated user", token: tokenSign(username) });
+        const newToken = tokenSign(user.id);
+
+        res.status(200).json({ message: "Successfully activated user", token: newToken });
     } catch (error) {
         console.error(error);
         res.status(500).json({ message: "Error occurred", errors: [{ msg: 'Server error' }] });

@@ -47,7 +47,10 @@ router.post('/', validationRules.accountRegistration, async (req, res) => {
             }
         });
 
-        res.status(200).json({ message: 'User registered successfully', token: tokenSign(username) });
+        const user = await controller.getUserById(userId);
+        const newToken = tokenSign(user.id);
+
+        res.status(200).json({ message: 'User registered successfully', token: newToken });
     } catch (error) {
         console.error(error);
         res.status(500).json({ message: "Error occurred", errors: [{ msg: 'Server error' }] });

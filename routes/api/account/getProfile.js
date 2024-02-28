@@ -16,13 +16,13 @@ router.get('/', validationRules.accountToken, async (req, res) => {
 
     try {
 
-        const username = tokenVerify(req.headers.token).userId;
-
-        if (!username) {
+        const requestedUser = await tokenVerify(req.headers.token);
+        const userId = requestedUser.userId;
+        if (!userId) {
             return res.status(401).json({ message: "Invalid token", errors: [{ msg: 'Invalid token' }] });
         }
 
-        const user = await controller.getUserByUsername(username);
+        const user = await controller.getUserById(userId);
         const profile = await controller.getProfileByUserId(user.id);
 
         const userData = {

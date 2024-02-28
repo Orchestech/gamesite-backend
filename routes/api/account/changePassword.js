@@ -17,26 +17,28 @@ router.put('/', validationRules.accountChangePassword, async (req, res) => {
 
     try {
 
-        const username = tokenVerify(req.headers.token).userId;
-        if (!username) {
+        const requestedUser = await tokenVerify(req.headers.token);
+        const userId = requestedUser.userId;
+        if (!userId) {
             return res.status(401).json({ message: "Invalid token", errors: [{ msg: 'Invalid token' }] });
         }
 
         const oldPassword = req.query.old_password;
         const newPassword = req.query.new_password;
 
-        const user = await controller.getUserByUsername(username);
+        const user = await controller.getUserById(userId);
         const hashedPassword = user.password;
 
         if (!await verifyPassword(oldPassword, hashedPassword)) {
-            return res.status(401).json({ message: "Invalid username or password", errors: [{ msg: 'Invalid username or password' }] });
+            return res.status(401).json({ message: "Old password is invalid", errors: [{ msg: 'Invalid old password' }] });
         }
 
         const newPasswordHashed = await hashPassword(newPassword);
 
-        await controller.patchObject('users', user.id, {password: newPasswordHashed});
+        await controller.patchObject('users', user.id, {password: newPasswordHashed, password_change_time: new Date().getTime()});
+        const newToken = tokenSign(user.id);
 
-        res.status(200).json({ message: "Successfully updated password", token: tokenSign(username) });
+        res.status(200).json({ message: "Successfully updated password", token: newToken });
     } catch (error) {
         console.error(error);
         res.status(500).json({ message: "Error occurred", errors: [{ msg: 'Server error' }] });

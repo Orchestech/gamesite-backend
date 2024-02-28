@@ -14,13 +14,13 @@ router.get('/', validationRules.accountToken, async (req, res) => {
 
     try {
 
-        const username = tokenVerify(req.headers.token);
-
-        if (!username) {
+        const requestedUser = await tokenVerify(req.headers.token);
+        const userId = requestedUser.userId;
+        if (!userId) {
             return res.status(401).json({ message: "Invalid token", errors: [{ msg: 'Invalid token' }] });
         }
 
-        res.status(200).json({ message: "Logged in", username: username });
+        res.status(200).json({ message: "Logged in" });
     } catch (error) {
         console.error(error);
         res.status(500).json({ message: "Error occurred", errors: [{ msg: 'Server error' }] });
