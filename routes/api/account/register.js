@@ -6,11 +6,14 @@ const {tokenSign} = require.main.require('../auth/jwt');
 const {db, pgp} = require.main.require('../database/db');
 const controller = require.main.require('../database/controller');
 
+const limiter = require.main.require('../ratelimit/ratelimit');
+
 const nodemailer = require('nodemailer');
 const {mailerOptions, mailerFrom} = require.main.require('../smtp/smtp');
 
 const router = express.Router();
 
+router.use(limiter);
 router.post('/', validationRules.accountRegistration, async (req, res) => {
 
     const errors = validationResult(req);

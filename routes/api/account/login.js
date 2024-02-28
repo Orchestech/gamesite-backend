@@ -5,9 +5,11 @@ const {db, pgp} = require.main.require('../database/db');
 const controller = require.main.require('../database/controller');
 const {tokenSign} = require.main.require('../auth/jwt');
 const {hashPassword, verifyPassword} = require.main.require('../auth/password-hasher');
+const limiter = require.main.require('../ratelimit/ratelimit');
 
 const router = express.Router();
 
+router.use(limiter);
 router.post('/', validationRules.accountLogin, async (req, res) => {
 
     const errors = validationResult(req);
