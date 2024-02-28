@@ -30,10 +30,10 @@ router.post('/', validationRules.accountRegistration, async (req, res) => {
         const activationKey = crypto.randomUUID();
 
         // Insert new user
-        const newUser = await db.one('INSERT INTO users (username, password, admin, activated, activation_deadline) VALUES ($1, $2, $3, $4, $5) RETURNING id',
-            [username, hashedPassword, false, false, activationDeadline]);
-
-        const userId = newUser.id;
+        const userId = await db.one('INSERT INTO users (username, password, admin, activated, activation_deadline) VALUES ($1, $2, $3, $4, $5) RETURNING id',
+            [username, hashedPassword, false, false, activationDeadline], a => a.id);
+        const newUserProfile = await db.none('INSERT INTO profiles (user_id, first_name, last_name, resume) VALUES ($1, $2, $3, $4)',
+            [userId, req.query.first_name, req.query.last_name, req.query.resume, activationDeadline]);
 
         // Insert activation key
         await db.any('INSERT INTO activationkeys (user_id, key, force_password_change) VALUES ($1, $2, $3) RETURNING id',
