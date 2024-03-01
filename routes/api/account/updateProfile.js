@@ -5,7 +5,7 @@ const {tokenVerify} = require.main.require('../auth/jwt');
 
 const router = express.Router();
 
-router.patch('/', validationRules.accountToken, async (req, res) => {
+router.patch('/', validationRules.accountUpdateProfile, async (req, res) => {
 
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
