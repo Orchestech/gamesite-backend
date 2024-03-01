@@ -30,9 +30,9 @@ const validationRules = {
     ],
     accountUpdateProfile:
     [
-      query('first_name').trim().notEmpty(),
-      query('last_name').trim().notEmpty(),
-      query('resume').trim().isLength({ min: 25, max: 2000 })
+      query('first_name').optional().trim().notEmpty(),
+      query('last_name').optional().trim().notEmpty(),
+      query('resume').optional().trim().isLength({ min: 25, max: 2000 })
     ],
     accountToken:
     [

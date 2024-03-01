@@ -20,10 +20,12 @@ router.patch('/', validationRules.accountUpdateProfile, async (req, res) => {
             return res.status(401).json({ message: "Invalid token", errors: [{ msg: 'Invalid token' }] });
         }
 
+        const oldData = controller.getProfileByUserId(userId);
+
         const newData = {
-            first_name: req.query.first_name,
-            last_name: req.query.last_name,
-            resume: req.query.resume
+            first_name: req.query.first_name ?? oldData.first_name,
+            last_name: req.query.last_name ?? oldData.last_name,
+            resume: req.query.resume ?? oldData.resume
         }
 
         await controller.patchObject('profiles', userId, newData);
