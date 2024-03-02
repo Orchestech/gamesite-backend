@@ -76,7 +76,10 @@ async function getDownloadLinkByActivetesterId(activetester_id) {
 }
 
 async function patchObject(table, id, object) {
-    return await db.none(`UPDATE ${table} SET ${Object.keys(object).map(key => `${key} = $${Object.keys(object).indexOf(key) + 2}`)} WHERE id = $1`, [id, ...Object.values(object)]);
+    const keys = Object.keys(object);
+    const setClause = keys.map((key, index) => `${key} = $${index + 2}`).join(', ');
+    return await db.none(`UPDATE ${table} SET ${setClause} WHERE id = $1`, [id, ...Object.values(object)]);
+    //return await db.none(`UPDATE ${table} SET ${Object.keys(object).map(key => `${key} = $${Object.keys(object).indexOf(key) + 2}`)} WHERE id = $1`, [id, ...Object.values(object)]);
 }
 
 async function deleteObject(table, id) {

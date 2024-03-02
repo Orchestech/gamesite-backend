@@ -20,6 +20,7 @@ var accountGetProfile = require('./routes/api/account/getProfile');
 var accountChangePassword = require('./routes/api/account/changePassword');
 var accountUpdateProfile = require('./routes/api/account/updateProfile');
 var betaGenerateDownloadLink = require('./routes/api/beta/generateDownloadLink');
+var betaDownloadGame = require('./routes/api/beta/downloadGame');
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
@@ -43,6 +44,7 @@ app.use('/api/account/getProfile', accountGetProfile);
 app.use('/api/account/changePassword', accountChangePassword);
 app.use('/api/account/updateProfile', accountUpdateProfile);
 app.use('/api/beta/generateDownloadLink', betaGenerateDownloadLink);
+app.use('/api/beta/downloadGame', betaDownloadGame);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
