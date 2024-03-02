@@ -24,8 +24,8 @@ router.post('/', validationRules.accountRegistration, async (req, res) => {
     try {
         // Check if username already exists
         const username = req.query.username.trim().toLowerCase();
-        const existingUser = await db.any('SELECT * FROM users WHERE username = $1', [username]);
-        if (existingUser.length > 0) {
+
+        if (await controller.isQuerySuccess(controller.getUserByUsername, username)) {
             return res.status(409).json({ message: "Username conflict", errors: [{ msg: 'Username already exists' }] });
         }
 

@@ -19,6 +19,10 @@ async function getUserByUsername(username) {
     return await db.one('SELECT * FROM users WHERE username = $1', [username]);
 }
 
+async function getUserByUsernameExists(username) {
+
+}
+
 async function createProfile(user_id, first_name, last_name, resume) {
     return await db.one('INSERT INTO profiles (user_id, first_name, last_name, resume) VALUES ($1, $2, $3, $4) RETURNING id',
             [user_id, first_name, last_name, resume], a => a.id);
@@ -53,9 +57,22 @@ async function deleteObject(table, id) {
     return await db.none(`DELETE FROM ${table} WHERE id = $1`, [id]);
 }
 
+async function isQuerySuccess(func, ...args) {
+    try {
+        await func(...args);
+        return true;
+    } catch (error) {
+        if (error instanceof pgp.errors.QueryResultError) {
+            return false;
+        }
+        throw error;
+    }
+}
+
 module.exports = {
     createUser, getUserById, getUserByUsername,
     createProfile, getProfileByUserId,
     createActivationKey, getActivationKeyById, getActivationKeyByUserId, getActivationKeyByKey,
-    patchObject, deleteObject
+    patchObject, deleteObject,
+    isQuerySuccess
 }
