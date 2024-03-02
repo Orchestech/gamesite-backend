@@ -19,10 +19,6 @@ async function getUserByUsername(username) {
     return await db.one('SELECT * FROM users WHERE username = $1', [username]);
 }
 
-async function getUserByUsernameExists(username) {
-
-}
-
 async function createProfile(user_id, first_name, last_name, resume) {
     return await db.one('INSERT INTO profiles (user_id, first_name, last_name, resume) VALUES ($1, $2, $3, $4) RETURNING id',
             [user_id, first_name, last_name, resume], a => a.id);
