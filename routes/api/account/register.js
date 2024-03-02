@@ -9,6 +9,7 @@ const controller = require.main.require('../database/controller');
 const limiter = require.main.require('../ratelimit/ratelimit');
 
 const nodemailer = require('nodemailer');
+const {registrationEmail} = require.main.require('../smtp/sysmails')
 const {mailerOptions, mailerFrom} = require.main.require('../smtp/smtp');
 
 const router = express.Router();
@@ -37,18 +38,19 @@ router.post('/', validationRules.accountRegistration, async (req, res) => {
         const keyId = await controller.createActivationKey(userId, activationKey, false);
 
         // Send account activation email
-        const transporter = nodemailer.createTransport(mailerOptions);
-        await transporter.sendMail({
-           from: mailerFrom,
-           to: username,
-           subject: 'Gamesite registration',
-           text: `Hi, ${req.query.first_name} ${req.query.last_name}!\nActivate your account by clicking the link below: https://rukolf.team/account/activate/${activationKey}`
-        }, (error) => {
-            if (error) {
-                console.error(mailerOptions);
-                console.error(error);
-            }
-        });
+        // const transporter = nodemailer.createTransport(mailerOptions);
+        // await transporter.sendMail({
+        //    from: mailerFrom,
+        //    to: username,
+        //    subject: 'Gamesite registration',
+        //    text: `Hi, ${req.query.first_name} ${req.query.last_name}!\nActivate your account by clicking the link below: https://rukolf.team/account/activate/${activationKey}`
+        // }, (error) => {
+        //     if (error) {
+        //         console.error(mailerOptions);
+        //         console.error(error);
+        //     }
+        // });
+        await registrationEmail(userId);
 
         const user = await controller.getUserById(userId);
         const newToken = tokenSign(user.id);
