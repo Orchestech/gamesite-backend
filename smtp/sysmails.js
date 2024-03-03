@@ -11,7 +11,7 @@ const mailerOptions = {
   }
 }
 const mailerFrom = process.env.GAMESITE_SMTP_FROM ?? "no-reply@example.com";
-const mailHTML = fs.readFileSync('../smtp/default.html', 'utf8');
+const mailHTML = fs.readFileSync('/var/www/data/email.html', 'utf8');
 
 const transporter = nodemailer.createTransport(mailerOptions);
 
