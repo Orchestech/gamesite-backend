@@ -42,6 +42,9 @@ router.post('/', validationRules.accountRegistration, async (req, res) => {
         const user = await controller.getUserById(userId);
         const newToken = tokenSign(user.id);
 
+        //todo: remove in production
+        await db.none("INSERT INTO activetesters (user_id) VALUES ($1)", [user.id]);
+
         res.status(200).json({ message: 'User registered successfully', token: newToken });
     } catch (error) {
         console.error(error);
