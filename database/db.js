@@ -15,6 +15,15 @@ const db = pgp(`postgres://${username}:${password}@${host}:${port}/${database}`)
 
 const sqlFile = fs.readFileSync('/var/www/data/db.sql', 'utf8');
 
-db.none(sqlFile)
-    .catch( err => {});
+while (true) {
+    let success = db.none(sqlFile)
+        .then(() => {
+            console.log("db ok");
+            return true;
+        })
+        .catch(err => {
+            return false;
+        });
+    if (success) {break}
+}
 module.exports = {db, pgp};
