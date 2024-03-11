@@ -35,7 +35,7 @@ router.put('/', validationRules.accountChangePassword, async (req, res) => {
 
         const newPasswordHashed = await hashPassword(newPassword);
 
-        await controller.patchObject('users', user.id, {password: newPasswordHashed, password_change_time: new Date().getTime()});
+        await controller.patchObject('users', user.id, {password: newPasswordHashed, last_password_change: new Date().getTime()});
         const newToken = tokenSign(user.id);
 
         res.status(200).json({ message: "Successfully updated password", token: newToken });

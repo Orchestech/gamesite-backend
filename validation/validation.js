@@ -13,6 +13,10 @@ const validationRules = {
     [
       query('code').notEmpty()
     ],
+    accountRequestRestoration:
+    [
+      query('username').trim().toLowerCase().notEmpty()
+    ],
     accountRestoration:
     [
       query('code').notEmpty(),

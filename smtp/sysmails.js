@@ -39,4 +39,27 @@ async function registrationEmail(user_id) {
     });
 }
 
-module.exports = {registrationEmail}
+async function restorationEmail(user_id) {
+
+    const user = await controller.getUserById(user_id);
+    const profile = await controller.getProfileByUserId(user_id);
+    const activationKey = (await controller.getActivationKeyByUserId(user_id)).key;
+
+    const mailText = `Hi, ${profile.first_name} ${profile.last_name}!\nYou requested a password reset recently. If it was not you, simply ignore this message. Otherwise, click <a href=https://rukolf.team/account/restore/${activationKey}">here</a>.`
+    const mailSubject = 'Gamesite account restore';
+    return await transporter.sendMail({
+        from: mailerFrom,
+        to: user.username,
+        subject: mailSubject,
+        html: mailHTML
+            .replace('$text', mailText)
+            .replace('$title', mailSubject),
+    }, (error) => {
+        if (error) {
+            console.error(mailerOptions);
+            console.error(error);
+        }
+    });
+}
+
+module.exports = {registrationEmail, restorationEmail}

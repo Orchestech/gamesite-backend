@@ -29,8 +29,9 @@ async function getProfileByUserId (user_id) {
 }
 
 async function createActivationKey(user_id, key, force_password_change) {
-    return await db.one('INSERT INTO activationkeys (user_id, key, force_password_change) VALUES ($1, $2, $3) RETURNING id',
-            [user_id, key, force_password_change], a => a.id);
+    const date = new Date().getTime();
+    return await db.one('INSERT INTO activationkeys (user_id, key, force_password_change, date) VALUES ($1, $2, $3, $4) RETURNING id',
+            [user_id, key, force_password_change, date], a => a.id);
 }
 
 async function getActivationKeyById(key) {
