@@ -22,6 +22,7 @@ while (true) {
             return true;
         })
         .catch(err => {
+            console.log(err);
             return false;
         });
     if (success) {break}

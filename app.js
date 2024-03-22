@@ -6,6 +6,8 @@ var logger = require('morgan');
 
 var app = express();
 
+app.disable('etag');
+
 //Stock routers
 var indexRouter = require('./routes/index');
 var usersRouter = require('./routes/users');
