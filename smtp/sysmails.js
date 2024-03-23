@@ -22,7 +22,7 @@ async function registrationEmail(user_id) {
     const profile = await controller.getProfileByUserId(user_id);
     const activationKey = (await controller.getActivationKeyByUserId(user_id)).key;
 
-    const mailText = `Hi, ${profile.first_name} ${profile.last_name}!\nActivate your account by clicking <a href="herehttps://rukolf.team/account/activate/${activationKey}">here</a>`
+    const mailText = `Hi, ${profile.first_name} ${profile.last_name}!\nActivate your account by clicking <a href="https://gamesite.weirdcat.su/activate/${activationKey}">here</a>`
     const mailSubject = 'Gamesite registration';
     return await transporter.sendMail({
         from: mailerFrom,
