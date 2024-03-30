@@ -33,8 +33,7 @@ router.get('/', validationRules.accountToken, async (req, res) => {
             activated: user.activated,
             activation_deadline: user.activation_deadline
         }
-
-        console.log(userData);
+        
         res.status(200).json(userData);
     } catch (error) {
         console.error(error);

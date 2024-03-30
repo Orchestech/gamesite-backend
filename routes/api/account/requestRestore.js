@@ -31,7 +31,6 @@ router.post('/', validationRules.accountRequestRestoration, async (req, res) => 
             return res.status(403).json({ message: "Account not activated", errors: [{ msg: 'This account is not activated' }] });
         }
 
-        console.log(`${new Date().getTime()} - ${existingActivationKey.date} = ${new Date().getTime() -existingActivationKey.date}`)
         if (existingActivationKey && existingActivationKey.force_password_change && new Date().getTime()-existingActivationKey.date < 360000 )
         {
             return res.status(427).json({ message: "To many attempts, try again later", errors: [{ msg: 'Too many attempts, try again later' }] });
